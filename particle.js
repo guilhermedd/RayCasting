@@ -1,8 +1,9 @@
 class Particle {
-    constructor(pos) {
+    constructor(pos, num_rays, width) {
         this.pos = pos;
+        this.width = width;
         this.rays = [];
-        for (let i = 0; i < 360; i += 0.1) {
+        for (let i = -30; i < 100; i += 360 / num_rays) {
             this.rays.push(new Ray(this.pos, radians(i)));
         }
     }
@@ -47,15 +48,40 @@ class Particle {
             fill(255);
             line(ray.pos.x, ray.pos.y, closest.x, closest.y);
         }
+        return closest;
     }
 
     look(walls) {
         let pts = [];
+        let rays = [];
         for (let ray of this.rays) {
             for (let i = 0; i < walls.length; i++) {
                 pts[i] = ray.intersect(walls[i]);
             }
-            this.show_closest(ray, pts);
+            rays.push(this.show_closest(ray, pts));
+        }
+        return rays;
+    }
+
+    render_rays() {
+        let rays = this.look(barriers);
+        let size_of_ray = this.width / rays.length;
+        for (let i = 0; i < rays.length; i++) {
+            rectMode(CENTER);
+            let dist = 0
+            // get the distance from the ray to the particle
+            if (rays[i] == null) {
+                console.log("null")
+                dist = this.width / 2
+            } else {
+                dist = this.pos.dist(createVector(rays[i].x, rays[i].y));
+            }
+            let filling = map(dist, 0, this.width / 2, 255, 0);
+            fill(filling);
+            noStroke();
+            // draw the rectangle for each ray and fill it with the distance
+            let height = map(dist, 0, this.width / 2, this.width, 0);
+            rect(this.width + size_of_ray * i + size_of_ray/2, this.width / 2, size_of_ray + 1, height);
         }
     }
 }
