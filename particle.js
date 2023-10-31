@@ -1,21 +1,13 @@
 class Particle {
-    constructor(pos, num_rays, width) {
+    constructor(pos, num_rays, width, height) {
         this.pos = pos;
         this.width = width;
+        this.height = height;
+        this.offset = 0;
+        this.fov = 45;
         this.rays = [];
-        for (let i = -30; i < 100; i += 360 / num_rays) {
+        for (let i = -this.fov; i < this.fov; i += 360 / num_rays) {
             this.rays.push(new Ray(this.pos, radians(i)));
-        }
-    }
-
-    show() {
-        push()
-        translate(this.pos.x, this.pos.y)
-        fill(255);
-        ellipse(0, 0, 16, 16);
-        pop();
-        for (let ray of this.rays) {
-            ray.show();
         }
     }
 
@@ -51,7 +43,32 @@ class Particle {
         return closest;
     }
 
+    rotate(angle) {
+        this.offset += angle;
+        for (let i = 0; i < this.rays.length; i++) {
+            if (this.rays[i].getAngle()) {
+                this.rays[i].setAngle(this.rays[i].getAngle() + angle);
+            }
+        }
+    }
+
+    walk() {
+        //walk to the pace im looking at
+        const dir = p5.Vector.fromAngle(this.offset);
+        dir.setMag(vel);
+        if (keyIsDown(LEFT_ARROW)) {
+            this.rotate(-0.05);
+        } if (keyIsDown(RIGHT_ARROW)) {
+            this.rotate(0.05);
+        } if (keyIsDown(UP_ARROW)) {
+            this.pos.add(dir);
+        } if (keyIsDown(DOWN_ARROW)) {
+            this.pos.sub(dir);
+        }
+    }
+
     look(walls) {
+        this.walk();
         let pts = [];
         let rays = [];
         for (let ray of this.rays) {
@@ -64,24 +81,32 @@ class Particle {
     }
 
     render_rays() {
-        let rays = this.look(barriers);
-        let size_of_ray = this.width / rays.length;
+        const rays = this.look(barriers);
+        const size_of_ray = this.width / rays.length;
+
         for (let i = 0; i < rays.length; i++) {
             rectMode(CENTER);
             let dist = 0
+
             // get the distance from the ray to the particle
+            // if the ray exists, otherwise set the distance to inf
             if (rays[i] == null) {
-                console.log("null")
-                dist = this.width / 2
+                dist = this.width
             } else {
                 dist = this.pos.dist(createVector(rays[i].x, rays[i].y));
             }
-            let filling = map(dist, 0, this.width / 2, 255, 0);
+
+            // Use the sqared distance to get a better gradient
+            const dsq = dist * dist;
+            const wsq = this.width * this.width;
+            const filling = map(dsq, 0, wsq, 255, 0);
+            const height = map(dist, 0, this.width, this.height, 0);
+
             fill(filling);
             noStroke();
+
             // draw the rectangle for each ray and fill it with the distance
-            let height = map(dist, 0, this.width / 2, this.width, 0);
-            rect(this.width + size_of_ray * i + size_of_ray/2, this.width / 2, size_of_ray + 1, height);
+            rect(this.width + size_of_ray * i + size_of_ray / 2, this.width / 2, size_of_ray + 1, height);
         }
     }
 }

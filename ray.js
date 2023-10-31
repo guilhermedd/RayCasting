@@ -1,21 +1,17 @@
 class Ray {
     constructor(pos, angle) {
         this.pos = pos;
+        this.angle = angle;
         this.dir = p5.Vector.fromAngle(angle);
     }
 
-    show() {
-        stroke(255);
-        push();
-        translate(this.pos.x, this.pos.y);
-        line(0, 0, this.dir.x * 10, this.dir.y * 10);
-        pop();
+    setAngle(angle) {
+        this.angle = angle;
+        this.dir = p5.Vector.fromAngle(angle);
     }
 
-    lookAt(x, y) {
-        this.dir.x = x - this.pos.x;
-        this.dir.y = y - this.pos.y;
-        this.dir.normalize();
+    getAngle() {
+        return this.angle;
     }
 
     intersect(wall) {
