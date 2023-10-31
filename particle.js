@@ -6,7 +6,7 @@ class Particle {
         this.offset = 0;
         this.fov = 45;
         this.rays = [];
-        for (let i = -this.fov; i < this.fov; i += 360 / num_rays) {
+        for (let i = -this.fov/2; i < this.fov/2; i += 1) {
             this.rays.push(new Ray(this.pos, radians(i)));
         }
     }
@@ -57,9 +57,9 @@ class Particle {
         const dir = p5.Vector.fromAngle(this.offset);
         dir.setMag(vel);
         if (keyIsDown(LEFT_ARROW)) {
-            this.rotate(-0.05);
+            this.rotate(-0.03);
         } if (keyIsDown(RIGHT_ARROW)) {
-            this.rotate(0.05);
+            this.rotate(0.03);
         } if (keyIsDown(UP_ARROW)) {
             this.pos.add(dir);
         } if (keyIsDown(DOWN_ARROW)) {
